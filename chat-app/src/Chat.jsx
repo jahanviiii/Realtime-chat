@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   ApolloClient,
   InMemoryCache,
@@ -23,6 +23,12 @@ const client = new ApolloClient({
   cache: new InMemoryCache(),
 });
 
+const POST_MESSAGES = gql`
+  mutation($user: String!, $content: String!) {
+    postMessage(user: $user, content: $content)
+  }
+`;
+
 const GET_MESSAGES = gql`
   subscription {
     messages {
@@ -33,14 +39,9 @@ const GET_MESSAGES = gql`
   }
 `;
 
-const POST_MESSAGE = gql`
-  mutation($user: String!, $content: String!) {
-    postMessage(user: $user, content: $content)
-  }
-`;
-
 const Messages = ({ user }) => {
   const { data } = useSubscription(GET_MESSAGES);
+
   if (!data) {
     return null;
   }
@@ -53,6 +54,7 @@ const Messages = ({ user }) => {
             display: "flex",
             justifyContent: user === messageUser ? "flex-end" : "flex-start",
             paddingBottom: "1em",
+            paddingTop: "0.5em",
           }}
         >
           {user !== messageUser && (
@@ -61,7 +63,7 @@ const Messages = ({ user }) => {
                 height: 50,
                 width: 50,
                 marginRight: "0.5em",
-                border: "2px solid #e5e6ea",
+                border: "2px solid #f4bb00",
                 borderRadius: 25,
                 textAlign: "center",
                 fontSize: "18pt",
@@ -73,11 +75,11 @@ const Messages = ({ user }) => {
           )}
           <div
             style={{
-              background: user === messageUser ? "blue" : "#e5e6ea",
+              background: user === messageUser ? "#58bf56" : "#e5e6ea",
               color: user === messageUser ? "white" : "black",
               padding: "1em",
               borderRadius: "1em",
-              maxWidth: "60%",
+              maxWidth: "56%",
             }}
           >
             {content}
@@ -89,11 +91,12 @@ const Messages = ({ user }) => {
 };
 
 const Chat = () => {
-  const [state, stateSet] = React.useState({
-    user: "Jack",
+  const [state, setState] = React.useState({
+    user: "Ryan",
     content: "",
   });
-  const [postMessage] = useMutation(POST_MESSAGE);
+
+  const [postMessage] = useMutation(POST_MESSAGES);
 
   const onSend = () => {
     if (state.content.length > 0) {
@@ -101,21 +104,23 @@ const Chat = () => {
         variables: state,
       });
     }
-    stateSet({
+
+    setState({
       ...state,
       content: "",
     });
   };
+
   return (
-    <Container>
+    <Container style={{ marginBottom: "2em" }}>
       <Messages user={state.user} />
-      <Row>
+      <Row className="mx-auto">
         <Col xs={2} style={{ padding: 0 }}>
           <FormInput
             label="User"
             value={state.user}
             onChange={(evt) =>
-              stateSet({
+              setState({
                 ...state,
                 user: evt.target.value,
               })
@@ -124,10 +129,10 @@ const Chat = () => {
         </Col>
         <Col xs={8}>
           <FormInput
-            label="Content"
+            label="User"
             value={state.content}
             onChange={(evt) =>
-              stateSet({
+              setState({
                 ...state,
                 content: evt.target.value,
               })

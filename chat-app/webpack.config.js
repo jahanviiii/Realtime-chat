@@ -1,7 +1,6 @@
-const HtmlWebPackPlugin = require("html-webpack-plugin");
+const HtmlWebpackPlugin = require("html-webpack-plugin");
 const ModuleFederationPlugin = require("webpack/lib/container/ModuleFederationPlugin");
 
-const deps = require("./package.json").dependencies;
 module.exports = {
   output: {
     publicPath: "http://localhost:8080/",
@@ -34,24 +33,15 @@ module.exports = {
   plugins: [
     new ModuleFederationPlugin({
       name: "chat",
+      library: { type: "var", name: "chat" },
       filename: "remoteEntry.js",
       remotes: {},
       exposes: {
         "./Chat": "./src/Chat",
       },
-      shared: {
-        ...deps,
-        react: {
-          singleton: true,
-          requiredVersion: deps.react,
-        },
-        "react-dom": {
-          singleton: true,
-          requiredVersion: deps["react-dom"],
-        },
-      },
+      shared: require("./package.json").dependencies,
     }),
-    new HtmlWebPackPlugin({
+    new HtmlWebpackPlugin({
       template: "./src/index.html",
     }),
   ],

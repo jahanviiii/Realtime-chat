@@ -3,27 +3,27 @@ const { GraphQLServer, PubSub } = require("graphql-yoga");
 const messages = [];
 
 const typeDefs = `
-  type Message {
+type Message {
     id: ID!
     user: String!
     content: String!
-  }
+}
 
-  type Query {
+type Query {
     messages: [Message!]
-  }
+}
 
-  type Mutation {
+type Mutation {
     postMessage(user: String!, content: String!): ID!
-  }
+}
 
-  type Subscription {
+type Subscription {
     messages: [Message!]
-  }
+}
 `;
 
 const subscribers = [];
-const onMessagesUpdates = (fn) => subscribers.push(fn);
+const onMessagesUpdate = (fn) => subscribers.push(fn);
 
 const resolvers = {
   Query: {
@@ -45,7 +45,7 @@ const resolvers = {
     messages: {
       subscribe: (parent, args, { pubsub }) => {
         const channel = Math.random().toString(36).slice(2, 15);
-        onMessagesUpdates(() => pubsub.publish(channel, { messages }));
+        onMessagesUpdate(() => pubsub.publish(channel, { messages }));
         setTimeout(() => pubsub.publish(channel, { messages }), 0);
         return pubsub.asyncIterator(channel);
       },
